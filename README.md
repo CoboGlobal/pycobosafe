@@ -5,7 +5,7 @@ A Python SDK for interactions with [Cobo Safe](https://github.com/coboglobal/cob
 # Installation
 
 ```sh
-pip install git+https://github.com/coboglobal/pycobosafe
+    pip install git+https://github.com/coboglobal/pycobosafe
 ```
 
 # Usage
@@ -14,7 +14,7 @@ A sample can be found [here](./sample/sample.py).
 
 Learn more about Cobo Safe and Cobo Argus at [Cobo Developer Hub](https://developers.cobo.com/smart-contract-custody/coboargus).
 
-`pycobosafe` provides an interactive console for interacting with `Cobo Safe` and allow users to view the information of Cobo Safe easily and perform simple on-chain actions.
+`pycobosafe` provides an interactive console for interacting with `Cobo Safe` and allows users to view the information of Cobo Safe easily to perform simple on-chain actions.
 
 ```
 $> pycobosafe -c polygon-main-fork
