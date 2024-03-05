@@ -13,7 +13,7 @@ setup(
     package_data={"pycobosafe": ["abi/*.json"]},
     python_requires=">=3.8",
     install_requires=[
-        "eth_abi==2.2.0",
+        "eth_abi==5.0.1",
         "eth_account==0.5.9",
         "eth_utils==1.10.0",
         "pytest==6.2.5",
