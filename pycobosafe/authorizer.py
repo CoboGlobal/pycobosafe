@@ -2,7 +2,10 @@ from .account import CoboSafeAccount, CoboSmartAccount
 from .ownable import ERC20, BaseOwnable
 from .rolemanager import FlatRoleManager
 from .utils import ETH_ADDRESS, b32, printline, s32
+import yaml
+import os
 
+BASE = os.path.dirname(__file__)
 
 def get_symbol(addr):
     if addr.lower() == ETH_ADDRESS.lower():
@@ -66,6 +69,12 @@ class BaseAuthorizer(BaseOwnable):
         print("Type:", self.type)
         print("Tag:", self.tag)
 
+    def export_config(self, filename=None):
+        if filename == None:
+            filename = self.contract.name
+        super().export_config(filename)
+        f = open(f'{BASE}/{filename}_config.yaml','a')
+        yaml.dump({"Caller":str(self.caller), "Flags":self.flag_str, "Type":self.type, "Tag":self.tag}, f)
 
 class ArgusRootAuthorizer(BaseAuthorizer):
     @property
@@ -85,11 +94,27 @@ class ArgusRootAuthorizer(BaseAuthorizer):
         except Exception:
             pass
         return set(role_list)
+    
+    @property
+    def delegates(self):
+        delegate_to_role = {}
+        try:
+            caller = self.caller
+            if CoboSafeAccount.match(caller) or CoboSmartAccount.match(caller):
+                role_mngr = CoboSafeAccount(caller).role_manager
+                delegate_list = FlatRoleManager(role_mngr).get_all_delegates()
+                for delegate in delegate_list:
+                    roles = FlatRoleManager(role_mngr).get_roles(delegate)
+                    delegate_to_role[delegate] = ",".join(s32(i) for i in roles)
+        except Exception:
+            pass
+        return delegate_to_role
 
     def get_authorizers(self, role, delegatecall=False):
         return self.contract.getAllAuthorizers(delegatecall, b32(role))
 
     def dump(self, full=False):
+        addr = self.contract.address
         super().dump(full)
 
         print("Authorizers:")
@@ -102,6 +127,10 @@ class ArgusRootAuthorizer(BaseAuthorizer):
                 name = BaseOwnable(auth).name
                 s.append(f"{name}({auth})")
             print(f"  {role}", ", ".join(s))
+        print("\nDelegates:")
+        for delegate in self.delegates.keys():
+            s = []
+            print(f"   {delegate}", self.delegates[delegate])
 
         if full:
             for addr in addrs:
@@ -162,6 +191,12 @@ class BaseACL(BaseAuthorizer):
         super().dump(full)
         print("Contracts:", ",".join(self.contracts))
 
+    def export_config(self, filename=None):
+        if filename == None:
+            filename = self.contract.name
+        super().export_config(filename)
+        f = open(f'{BASE}/{filename}_config.yaml','a')
+        yaml.dump({"Contracts":[str(x) for x in self.contracts]}, f)
 
 class DEXBaseACL(BaseACL):
     TYPE = "DexType"
@@ -187,3 +222,37 @@ class DEXBaseACL(BaseACL):
 
         print("In tokens:", ",".join(self.in_token_symbols))
         print("Out tokens:", ",".join(self.out_token_symbols))
+
+class FarmingBaseACL(BaseACL):
+    TYPE = "CommonType"
+
+    @property
+    def whitelist_ids(self):
+        return [str(x) for x in self.contract.getPoolIdWhiteList()]
+    
+    @property
+    def whitelist_addresses(self):
+        return [str(x) for x in self.contract.getPoolAddressWhiteList()]
+
+    def dump(self, full=False):
+        super().dump(full)
+        print("Whitelist IDs:", ", ".join(self.whitelist_ids))
+        print("Whitelist addresses:", ", ".join(self.whitelist_addresses))
+
+    def export_config(self, filename=None):
+        if filename == None:
+            filename = self.contract.name
+        super().export_config(filename)
+        f = open(f'{BASE}/{filename}_config.yaml','a')
+        yaml.dump({"Whitelist IDs":[int(x) for x in self.whitelist_ids], "Whitelist addresses":self.whitelist_addresses}, f)
+
+class StargateWithdrawAuthorizer(FarmingBaseACL):
+    def dump(self, full=False):
+        super().dump(full)
+
+    def export_config(self, filename=None):
+        if filename == None:
+            filename = self.contract.name
+        super().export_config(filename)
+        f = open(f'{BASE}/{filename}_config.yaml','a')
+        
