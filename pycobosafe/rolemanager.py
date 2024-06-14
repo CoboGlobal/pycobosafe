@@ -15,8 +15,11 @@ class FlatRoleManager(BaseOwnable):
 
     def dump(self, full=False):
         super().dump(full)
-        print("Delegate", " " * 3, "Roles")
+        print("Delegate -> Roles:")
         for delegate in self.get_all_delegates():
             roles = self.get_roles(delegate)
-            roles = ",".join(s32(i) for i in roles)
-            print(delegate, roles)
+            roles = [s32(i) for i in roles]
+            roles = [i if i else "0x"+'0'*64 for i in roles]
+            print(f"    {delegate}")
+            for i in roles:
+                print(f"        {i}")

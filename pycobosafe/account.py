@@ -84,7 +84,9 @@ class CoboAccount(BaseOwnable):
         super().dump(full)
         print("Authorizer:", self.authorizer)
         print("Role manager:", self.role_manager)
-        print("Delegates:", ",".join(self.delegates))
+        print("Delegates:")
+        for i in self.delegates:
+            print("   ", i)
 
         if full:
             printline()

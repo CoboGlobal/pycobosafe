@@ -26,7 +26,10 @@ class BaseAuthorizer(BaseOwnable):
 
     @property
     def caller(self):
-        return self.contract.caller()
+        try:
+            return self.contract.caller()
+        except Exception as e:
+            return "Unsupported"
 
     @property
     def tag(self):
@@ -105,7 +108,7 @@ class ArgusRootAuthorizer(BaseAuthorizer):
                 delegate_list = FlatRoleManager(role_mngr).get_all_delegates()
                 for delegate in delegate_list:
                     roles = FlatRoleManager(role_mngr).get_roles(delegate)
-                    delegate_to_role[delegate] = ",".join(s32(i) for i in roles)
+                    delegate_to_role[delegate] = [s32(i) for i in roles]
         except Exception:
             pass
         return delegate_to_role
@@ -117,7 +120,7 @@ class ArgusRootAuthorizer(BaseAuthorizer):
         addr = self.contract.address
         super().dump(full)
 
-        print("Authorizers:")
+        print("Role -> Authorizers:")
         addrs = []
         for role in self.roles:
             auths = self.get_authorizers(role)
@@ -126,18 +129,24 @@ class ArgusRootAuthorizer(BaseAuthorizer):
             for auth in auths:
                 name = BaseOwnable(auth).name
                 s.append(f"{name}({auth})")
-            print(f"  {role}", ", ".join(s))
-        print("\nDelegates:")
+            
+            if not role:
+                role = "0x" + '0'*64
+            print(f"    {role}")
+            for i in s:
+                print(f"        {i}")
+
+        print("Delegates -> Roles:")
         for delegate in self.delegates.keys():
             s = []
-            print(f"   {delegate}", self.delegates[delegate])
+            print(f"    {delegate}")
+            for role in self.delegates[delegate]:
+                print(f"        {role}")
 
         if full:
             for addr in addrs:
                 printline()
-
                 from .autocontract import dump
-
                 dump(addr, full)
 
 
@@ -157,8 +166,9 @@ class TransferAuthorizer(BaseAuthorizer):
         for token in self.tokens:
             receivers = self.get_receivers(token)
             token = get_symbol(token)
-            print(f"  {token}", ",".join(receivers))
-
+            print(f"    {token}")
+            for i in receivers:
+                print(f"        {i}")
 
 class FuncAuthorizer(BaseAuthorizer):
     TYPE = "FunctionType"
@@ -177,7 +187,9 @@ class FuncAuthorizer(BaseAuthorizer):
         print("Contract -> Functions:")
         for contract in self.contracts:
             funcs = self.get_funcs(contract)
-            print(f"  {contract}", ",".join(funcs))
+            print(f"    {contract}")
+            for i in funcs:
+                print(f"        {i}")
 
 
 class BaseACL(BaseAuthorizer):
@@ -185,11 +197,16 @@ class BaseACL(BaseAuthorizer):
 
     @property
     def contracts(self):
-        return self.contract.contracts()
+        try:
+            return self.contract.contracts()
+        except Exception:
+            return []
 
     def dump(self, full=False):
         super().dump(full)
-        print("Contracts:", ",".join(self.contracts))
+        print("Contracts:")
+        for i in self.contracts:
+            print("   ", i)
 
     def export_config(self, filename=None):
         if filename == None:
@@ -220,39 +237,43 @@ class DEXBaseACL(BaseACL):
     def dump(self, full=False):
         super().dump(full)
 
-        print("In tokens:", ",".join(self.in_token_symbols))
-        print("Out tokens:", ",".join(self.out_token_symbols))
+        print("In tokens:")
+        for i in self.in_token_symbols:
+            print("   ", i)
+        print("Out tokens:")
+        for i in self.out_token_symbols:
+            print("   ", i)
 
-class FarmingBaseACL(BaseACL):
-    TYPE = "CommonType"
+# class FarmingBaseACL(BaseACL):
+#     TYPE = "CommonType"
 
-    @property
-    def whitelist_ids(self):
-        return [str(x) for x in self.contract.getPoolIdWhiteList()]
+#     @property
+#     def whitelist_ids(self):
+#         return [str(x) for x in self.contract.getPoolIdWhiteList()]
     
-    @property
-    def whitelist_addresses(self):
-        return [str(x) for x in self.contract.getPoolAddressWhiteList()]
+#     @property
+#     def whitelist_addresses(self):
+#         return [str(x) for x in self.contract.getPoolAddressWhiteList()]
 
-    def dump(self, full=False):
-        super().dump(full)
-        print("Whitelist IDs:", ", ".join(self.whitelist_ids))
-        print("Whitelist addresses:", ", ".join(self.whitelist_addresses))
+#     def dump(self, full=False):
+#         super().dump(full)
+#         print("Whitelist IDs:", ", ".join(self.whitelist_ids))
+#         print("Whitelist addresses:", ", ".join(self.whitelist_addresses))
 
-    def export_config(self, filename=None):
-        if filename == None:
-            filename = self.contract.name
-        super().export_config(filename)
-        f = open(f'{BASE}/{filename}_config.yaml','a')
-        yaml.dump({"Whitelist IDs":[int(x) for x in self.whitelist_ids], "Whitelist addresses":self.whitelist_addresses}, f)
+#     def export_config(self, filename=None):
+#         if filename == None:
+#             filename = self.contract.name
+#         super().export_config(filename)
+#         f = open(f'{BASE}/{filename}_config.yaml','a')
+#         yaml.dump({"Whitelist IDs":[int(x) for x in self.whitelist_ids], "Whitelist addresses":self.whitelist_addresses}, f)
 
-class StargateWithdrawAuthorizer(FarmingBaseACL):
-    def dump(self, full=False):
-        super().dump(full)
+# class StargateWithdrawAuthorizer(FarmingBaseACL):
+#     def dump(self, full=False):
+#         super().dump(full)
 
-    def export_config(self, filename=None):
-        if filename == None:
-            filename = self.contract.name
-        super().export_config(filename)
-        f = open(f'{BASE}/{filename}_config.yaml','a')
+#     def export_config(self, filename=None):
+#         if filename == None:
+#             filename = self.contract.name
+#         super().export_config(filename)
+#         f = open(f'{BASE}/{filename}_config.yaml','a')
         
