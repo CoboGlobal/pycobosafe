@@ -28,8 +28,8 @@ class BaseAuthorizer(BaseOwnable):
     def caller(self):
         try:
             return self.contract.caller()
-        except Exception as e:
-            return "Unsupported"
+        except Exception:
+            return None
 
     @property
     def tag(self):
@@ -146,7 +146,9 @@ class ArgusRootAuthorizer(BaseAuthorizer):
         if full:
             for addr in addrs:
                 printline()
+
                 from .autocontract import dump
+
                 dump(addr, full)
 
 

@@ -3,11 +3,13 @@ import random
 from brownie import accounts
 
 from .ownable import BaseOwnable
-from .utils import FACTORY_ADDRESS, ZERO_ADDRESS, b32, s32
+from .utils import ZERO_ADDRESS, b32, get_factory_address, s32
 
 
 class CoboFactory(BaseOwnable):
-    def __init__(self, address=FACTORY_ADDRESS) -> None:
+    def __init__(self, address=None) -> None:
+        if address is None:
+            address = get_factory_address()
         super().__init__(address)
 
     def get_address(self, name):
@@ -66,7 +68,9 @@ class CoboFactory(BaseOwnable):
         if deployer is None:
             deployer = accounts.default
 
-        proxy = self.contract.getCreate2Address(deployer, name, salt)
+        # proxy = self.contract.getCreate2Address(deployer, name, salt)
+        proxy = self.contract.create2.call(name, salt, {"from": deployer})
+
         self.contract.create2(name, salt, {"from": deployer})
 
         if create_wrapper:

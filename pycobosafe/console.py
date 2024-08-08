@@ -7,12 +7,12 @@ from .account import CoboSafeAccount, CoboSmartAccount
 from .factory import CoboFactory
 from .gnosissafe import GnosisSafe
 from .utils import (
-    FACTORY_ADDRESS,
     b32,
     connect_new_chain,
     get_address_url,
     get_all_support_chains,
     get_current_chain,
+    get_factory_address,
     load_account,
     rand_salt,
 )
@@ -29,8 +29,8 @@ class CoboSafeConsole(cmd.Cmd):
         super().__init__()
 
         self.debug = False
-        self.factory_address = FACTORY_ADDRESS
         self.delegate_address = None
+        self.factory_address = get_factory_address()
 
         self.reset()
 
@@ -38,14 +38,15 @@ class CoboSafeConsole(cmd.Cmd):
         # Changes along the network.
         self.safe_address = None
         self.cobosafe_address = None
+        self.factory_address = get_factory_address()
 
     ##################################################################
     # Console related functions.
 
     def _arg_as_addr(self, arg, default_value=None):
         if arg:
-            assert Web3.isAddress(arg), f"{arg} is not valid address"
-            return Web3.toChecksumAddress(arg)
+            assert Web3.is_address(arg), f"{arg} is not valid address"
+            return Web3.to_checksum_address(arg)
         return default_value
 
     def onecmd(self, line):

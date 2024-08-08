@@ -20,7 +20,7 @@ cobosafe = CoboSafeAccount(COBOSAFE, DELEGATE)
 # You have to ensure the delegate has been correctly authorized by the safe owners before.
 # If not, the transactions below will fail.
 
-WMATIC = Web3.toChecksumAddress("0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270")
+WMATIC = Web3.to_checksum_address("0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270")
 
 # (Option 1) Call contract with ABI in the brownie way.
 ERC20_ABI = json.load(open(os.path.join(os.path.dirname(__file__), "ERC20.json")))

@@ -1,7 +1,7 @@
 from .factory import CoboFactory
 from .gnosissafe import GnosisSafe
 from .ownable import BaseOwnable
-from .utils import FACTORY_ADDRESS, Operation, abi_encode_with_sig, printline
+from .utils import Operation, abi_encode_with_sig, get_factory_address, printline
 
 
 class CoboAccount(BaseOwnable):
@@ -130,7 +130,7 @@ class CoboSafeAccount(CoboAccount):
     @classmethod
     def create(cls, safe_address, factory_address=None):
         if factory_address is None:
-            factory_address = FACTORY_ADDRESS
+            factory_address = get_factory_address()
 
         factory = CoboFactory(factory_address)
         account = factory.create(cls)
@@ -145,7 +145,7 @@ class CoboSmartAccount(CoboAccount):
     @classmethod
     def create(cls, owner_address, factory_address=None):
         if factory_address is None:
-            factory_address = FACTORY_ADDRESS
+            factory_address = get_factory_address()
 
         factory = CoboFactory(factory_address)
         account = factory.create(cls)

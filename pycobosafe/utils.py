@@ -108,8 +108,6 @@ def load_contract(name, address, abi=None, sender=None):
     return Contract.from_abi(name, address, abi, sender)
 
 
-FACTORY_ADDRESS = "0xC0B00000e19D71fA50a9BB1fcaC2eC92fac9549C"
-
 network.main.CONFIG.networks["avax-main"]["host"] = "https://rpc.ankr.com/avalanche"
 network.main.CONFIG.networks["polygon-main"]["host"] = "https://rpc.ankr.com/polygon"
 network.main.CONFIG.networks["mainnet"]["host"] = "https://rpc.ankr.com/eth"
@@ -132,6 +130,12 @@ SCAN_URLS = {
     137: "https://polygonscan.com/address/",  # polygon
     42161: "https://arbiscan.io/address/",  # arbitrum
     43114: "https://snowtrace.io/address/",  # avax
+    8453: "https://basescan.org/address/",  # base
+    100: "https://gnosisscan.io/address/",  # gnosis
+    5000: "https://explorer.mantle.xyz/address/",  # mantle
+    169: "https://pacific-explorer.manta.network/address/",  # manta
+    34443: "https://explorer.mode.network/address/",  # mode
+    534352: "https://scrollscan.com/address/",  # scroll
 }
 
 
@@ -139,3 +143,11 @@ def get_address_url(addr):
     chainid = web3.chain_id
     assert chainid in SCAN_URLS, f"Unsupport chain {chainid} {get_current_chain()}"
     return SCAN_URLS[chainid] + str(addr)
+
+
+def get_factory_address():
+    chainid = web3.chain_id
+    if chainid in [8453, 5000, 169, 34443]:
+        return "0x589b92136f97c26CA8BB907a2e3208580422E847"
+    else:
+        return "0xC0B00000e19D71fA50a9BB1fcaC2eC92fac9549C"
