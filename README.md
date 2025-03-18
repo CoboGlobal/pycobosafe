@@ -12,7 +12,7 @@ pip install git+https://github.com/coboglobal/pycobosafe
 
 A sample can be found [here](./sample/sample.py).
 
-Learn more about Cobo Safe and Cobo Argus at [Cobo Developer Hub](https://developers.cobo.com/smart-contract-custody/coboargus).
+Learn more about Cobo Safe and Cobo Argus at [Cobo Developer Hub](https://www.cobo.com/developers/v1/overview/smart-contract-wallet/cobosafe).
 
 `pycobosafe` provides an interactive console for interacting with `Cobo Safe` allowing users to view the information of Cobo Safe easily and perform simple on-chain actions.
 
